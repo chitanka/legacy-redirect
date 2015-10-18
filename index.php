@@ -418,7 +418,7 @@ class mlDatabase {
 
 	public function escape($string) {
 		if ( !isset($this->conn) ) { $this->connect(); }
-		return mysql_real_escape_string($string, $this->conn);
+		return mysqli_real_escape_string( $this->conn, $string);
 	}
 
 
@@ -434,10 +434,10 @@ class mlDatabase {
 		}
 
 		if ( !isset($this->conn) ) { $this->connect(); }
-		$res = mysql_query($query, $this->conn);
+		$res = mysqli_query( $this->conn, $query);
 		if ( !$res ) {
-			$errno = mysql_errno();
-			$error = mysql_error();
+			$errno = ((is_object($GLOBALS["___mysqli_ston"])) ? mysqli_errno($GLOBALS["___mysqli_ston"]) : (($___mysqli_res = mysqli_connect_errno()) ? $___mysqli_res : false));
+			$error = ((is_object($GLOBALS["___mysqli_ston"])) ? mysqli_error($GLOBALS["___mysqli_ston"]) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
 			$this->log("Error $errno: $error\nQuery: $query\n".
 				"Backtrace\n". print_r(debug_backtrace(), true), true);
 			return false;
@@ -447,30 +447,30 @@ class mlDatabase {
 	}
 
 	public function fetchAssoc($result) {
-		return mysql_fetch_assoc($result);
+		return mysqli_fetch_assoc($result);
 	}
 
 	public function fetchRow($result) {
-		return mysql_fetch_row($result);
+		return mysqli_fetch_row($result);
 	}
 
 	public function numRows($result) {
-		return mysql_num_rows($result);
+		return mysqli_num_rows($result);
 	}
 
 	protected function connect() {
-		$this->conn = mysql_connect($this->server, $this->user, $this->pass, true)
+		$this->conn = ($GLOBALS["___mysqli_ston"] = mysqli_connect($this->server,  $this->user,  $this->pass))
 			or $this->mydie("Проблем: Няма връзка с базата. Изчакайте пет минути и опитайте отново да заредите страницата.");
-		mysql_select_db($this->dbName, $this->conn)
+		((bool)mysqli_query( $this->conn, "USE " . $this->dbName))
 			or $this->mydie("Could not select database $this->dbName.");
-		mysql_query("SET NAMES '$this->charset' COLLATE '$this->collationConn'", $this->conn)
+		mysqli_query( $this->conn, "SET NAMES '$this->charset' COLLATE '$this->collationConn'")
 			or $this->mydie("Could not set names to '$this->charset':");
 	}
 
 	protected function mydie($msg) {
 		header('Content-Type: text/plain; charset=UTF-8');
 		header('HTTP/1.1 503 Service Temporarily Unavailable');
-		die($msg .' '. mysql_error());
+		die($msg .' '. ((is_object($GLOBALS["___mysqli_ston"])) ? mysqli_error($GLOBALS["___mysqli_ston"]) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false)));
 	}
 
 	protected function log($msg, $isError = true)
