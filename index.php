@@ -6,7 +6,6 @@ ini_set('error_log', $thisDir . '/log/error');
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
-
 define('BASEDIR', dirname(__FILE__));
 
 
@@ -14,9 +13,10 @@ define('BASEDIR', dirname(__FILE__));
 * Load a class file.
 * @param $class Class name
 */
-function __autoload($class) {
-	require_once $class .'.php';
-}
+spl_autoload_register(
+function($class) {
+	require $class .'.php';
+});
 
 function addIncludePath($path) {
 	if ( is_array($path) ) {
@@ -578,7 +578,6 @@ class PageManager {
 		return BASEDIR .'/'. self::$pageDir;
 	}
 }
-
 
 
 
